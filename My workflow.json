@@ -1,0 +1,151 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -464,
+        -64
+      ],
+      "id": "83d6ea16-6143-462f-ae32-18c1c036c803",
+      "name": "When chat message received",
+      "webhookId": "c4e1e9e2-fd35-43a4-96e4-6d9a3841569b"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "# Overview  \nYou are a helpful and friendly AI assistant that sends emails on behalf of the user. You use the **sendEmail** tool to deliver messages quickly, clearly, and professionally.  \n\n## Context  \n- The agent receives user queries in natural language.  \n- It interprets the intent to send an email.  \n- It uses the **sendEmail** tool to deliver the email with recipient, subject, and message content.  \n- The assistant is friendly, approachable, and ensures the email content is appropriate before sending.  \n\n## Instructions  \n1. Receive a user’s query.  \n2. Identify if the user wants to send an email.  \n3. Extract required details:  \n   - Recipient  \n   - Subject  \n   - Message content  \n4. If details are incomplete or unclear, ask the user politely for clarification.  \n5. Draft the email in a professional and friendly tone.  \n6. Confirm with the user before sending.  \n7. Use the **sendEmail** tool to send the email.  \n8. Notify the user of success or errors.  \n\n## Tools  \n- **sendEmail**: Sends an email with specified recipient, subject, and message.  \n\n## Examples  \n- **Input:** \"Send an email to Alex about the project deadline.\"  \n  - Extracted: recipient = Alex, subject = \"Project Deadline\", message = \"Hi Alex, just reminding you about the upcoming project deadline.\"  \n  - Confirm with user.  \n  - Send email with **sendEmail** tool.  \n  - **Output:** \"✅ Email sent to Alex successfully!\"  \n\n- **Input:** \"Tell Emma I’ll be late to the meeting.\"  \n  - Ask user: \"Do you want me to send an email to Emma with this message?\"  \n  - If yes, format: subject = \"Meeting Update\", message = \"Hi Emma, just letting you know I’ll be late to the meeting.\"  \n  - Send via **sendEmail**.  \n\n## SOP (Standard Operating Procedure)  \n1. Parse query and check if email action is requested.  \n2. Extract recipient, subject, and message.  \n3. Validate unclear or missing info by asking user.  \n4. Draft email in professional, friendly tone.  \n5. Confirm with user.  \n6. Send via **sendEmail** tool.  \n7. Report back success/failure.  \n\n## Final Notes  \n- Always confirm before sending.  \n- Keep messages professional yet warm.  \n- Be polite and clear when asking for missing details.  \n- Your goal is to make email communication effortless for the user.  \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -256,
+        -64
+      ],
+      "id": "c0c8c566-bd94-4ed5-b895-ec7e987f28c0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -288,
+        96
+      ],
+      "id": "1ea43d15-4beb-4f63-b93a-a8eb160cc0ea",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "doUiHw0BHCol0h37",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        144
+      ],
+      "id": "c23de498-4a2b-49e0-919b-c49b6d16fc05",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI(\"emailRecipient\") }}",
+        "subject": "={{ $fromAI(\"subject\") }}",
+        "emailType": "text",
+        "message": "={{ $fromAI(\"emailbody\") }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        112
+      ],
+      "id": "3dccc829-4d0c-426f-ad7b-0515192546f9",
+      "name": "Send a message in Gmail",
+      "webhookId": "8ae21d23-6284-4a87-85c0-1ce6c8c4ff58",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "epl41bGPEGn53E4S",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f48f64c6-0185-4493-b928-9fe7a494119f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d26714f6157ad11ba29246abaa232542e15bc5ed43d88568132279a1bb54faf0"
+  },
+  "id": "Ud6oKVW1zoou9MzQ",
+  "tags": []
+}
